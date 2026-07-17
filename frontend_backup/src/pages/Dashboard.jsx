@@ -216,7 +216,7 @@ export default function Dashboard({ showToast }) {
       };
       ws.onclose = () => {
         clearInterval(pingInterval);
-        if (!isCleaned) reconnectTimeout = setTimeout(connectWs, 3000);
+        // if (!isCleaned) reconnectTimeout = setTimeout(connectWs, 3000); // Disabled to stop 404 spam
       };
     };
 
