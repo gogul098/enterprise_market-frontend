@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiRoute Pro - Warehouse Inventory Planning</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body class="inventory-body">
+
+    <!-- Standalone Inventory Console Panel (Centered Layout) -->
+    <div class="console-panel centered-panel">
+        
+        <!-- Header (Fixed) -->
+        <div class="header">
+            <div>
+                <div class="brand">
+                    <div class="brand-icon" style="background: linear-gradient(135deg, #cbd5e1, #64748b);">📦</div>
+                    <h1 class="brand-title">Inventory Planning</h1>
+                </div>
+                <p class="subtitle">Actual daily demands, restocks, & returns</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+
+                <button class="btn-clear" id="btn-reset" title="Refresh planning data">Refresh</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Tabs Navigation (Removed) -->
+
+        <!-- Panel 1: Inventory Planning (Removed) -->
+
+        <!-- Panel 2: Demand Forecasting -->
+        <div id="panel-forecasting" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; padding: 20px 26px;">
+            <div class="input-label" style="margin-bottom: 12px; font-weight:700;">Product Demand Forecast</div>
+            <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;" id="forecasting-container">
+                <div class="loading-text">
+                    <span class="spinner"></span>
+                    Analyzing order velocity...
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 3: Vendor Performance (Removed) -->
+
+        <!-- Toast Banner -->
+        <div class="toast-banner" id="toast-banner">
+            <span id="toast-text">Success message</span>
+        </div>
+
+    </div>
+
+    <!-- Background Elements -->
+    <div class="bg-blur"></div>
+
+    <script src="app.js" defer></script>
+</body>
+</html>

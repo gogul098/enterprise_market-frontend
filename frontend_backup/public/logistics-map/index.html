@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiRoute Pro - Multi-Stop Route Optimizer</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- External Modular Stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- Floating UI Console -->
+    <div class="console-panel">
+        
+        <!-- Header (Fixed) -->
+        <div class="header">
+            <div>
+                <div class="brand">
+                    <div class="brand-icon">L</div>
+                    <h1 class="brand-title">LogiRoute Pro</h1>
+                </div>
+                <p class="subtitle">TSP Multi-Stop Delivery Optimizer</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <!-- Shipment Selector Dropdown -->
+                <select id="shipment-select" style="padding: 6px 12px; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-family: var(--font-family); font-size: 0.78rem; outline: none; cursor: pointer; max-width: 170px; font-weight: 500;">
+                    <option value="">Load Shipment...</option>
+                </select>
+                <a href="http://127.0.0.1:8001/" target="_blank" class="btn-clear" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; background: rgba(58, 134, 255, 0.15); color: var(--primary); border-color: rgba(58, 134, 255, 0.3);" title="Open Inventory planning Dashboard">📅 Inventory</a>
+                <button class="btn-clear" id="btn-reset" title="Clear Console & Map">Reset</button>
+            </div>
+        </div>
+
+        <!-- Inputs Form (Flex container) -->
+        <div class="form">
+            
+            <!-- Scrollable content area: Inputs & settings scroll while calculate button is pinned -->
+            <div class="form-scroll-area" id="form-scroll-area">
+                
+                <!-- Shipment Metadata Card -->
+                <div id="shipment-meta" style="display: none; background: rgba(58, 134, 255, 0.08); border: 1px solid rgba(58, 134, 255, 0.2); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+                    <div style="font-weight: 700; color: var(--primary); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--primary)"><path d="M20 8h-3V4H3v12h2v4h16v-8zM5 14H5V6h10v8H5zm14 4H7v-2h10v-6h3v8z"/></svg>
+                        Shipment Information
+                    </div>
+                    <div style="font-size: 0.84rem; line-height: 1.6; color: #cbd5e1;">
+                        <div><strong>Carrier:</strong> <span id="meta-carrier">-</span></div>
+                        <div><strong>Tracking Number:</strong> <span id="meta-tracking">-</span></div>
+                        <div><strong>Shipping Cost:</strong> <span id="meta-cost">-</span></div>
+                        <div><strong>Estimated Delivery:</strong> <span id="meta-eta">-</span></div>
+                    </div>
+                </div>
+
+                <div class="inputs-container" id="inputs-container">
+                    <!-- Source / Hub -->
+                    <div class="input-group">
+                        <label class="input-label" for="src-input">Dispatch Hub (Start)</label>
+                        <div class="input-wrapper">
+                            <!-- Pin Icon -->
+                            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                            <input class="input-field location-input" id="src-input" type="text" placeholder="Enter dispatch hub address..." autocomplete="off">
+                            <button class="btn-locate" id="btn-gps" title="Locate Me">
+                                <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h-2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+                            </button>
+                        </div>
+                        <div class="suggestions-dropdown" id="src-dropdown"></div>
+                    </div>
+
+                    <!-- Drop-offs placeholder area (dynamically populated) -->
+                </div>
+
+                <!-- Add Dropoff Button -->
+                <button class="btn-add-destination" id="btn-add-stop" type="button">
+                    <strong>+</strong> Add Drop-off Destination
+                </button>
+
+                <!-- Travel Profiles -->
+                <div class="input-group">
+                    <label class="input-label">Travel Mode</label>
+                    <div class="modes-panel">
+                        <button class="mode-btn active" data-mode="driving">🚗 Drive</button>
+                        <button class="mode-btn" data-mode="bicycle">🚲 Cycle</button>
+                        <button class="mode-btn" data-mode="foot">🚶 Walk</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Go button (Pinned at the bottom of the form block) -->
+            <button class="btn-submit" id="btn-calculate" type="button">
+                <span class="spinner" id="loading-indicator"></span>
+                <span id="btn-label">Calculate & Optimize Route</span>
+            </button>
+
+        </div>
+
+        <!-- Interactive Statistics & Directions Drawer -->
+        <div class="analytics-panel" id="stats-panel">
+            
+            <!-- Cards Grid -->
+            <div class="stats-container" id="stats-container">
+                <!-- Populated dynamically based on profile -->
+            </div>
+
+            <!-- Directions list -->
+            <div class="directions-container">
+                <div class="directions-header">
+                    <svg width="18" height="18" fill="var(--primary)" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
+                    Optimized Delivery Sequence
+                </div>
+                <ol class="directions-steps" id="steps-list"></ol>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="map"></div>
+
+    <!-- GPS Tracking Target Control -->
+    <button id="btn-map-track" class="btn-map-control" title="Center & Track Location">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="7"></circle>
+            <line x1="12" y1="1" x2="12" y2="5"></line>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="1" y1="12" x2="5" y2="12"></line>
+            <line x1="19" y1="12" x2="23" y2="12"></line>
+        </svg>
+    </button>
+
+    <div class="toast-banner" id="toast-banner">
+        <span id="toast-text">Success message</span>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://system-siege-api.onrender.com/api/$1" },
+    { "source": "/auth/(.*)", "destination": "https://system-siege-api.onrender.com/auth/$1" },
+    { "source": "/ws/(.*)", "destination": "https://system-siege-api.onrender.com/ws/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
