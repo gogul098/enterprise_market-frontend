@@ -99,7 +99,11 @@ export default function Dashboard({ showToast }) {
       fetchOrders();
     }
 
-    const wsUrl = import.meta.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/inventory`;
+    // Fallback to Render URL automatically when running on Vercel, to avoid Edge Network WebSocket drops
+    const defaultWsHost = window.location.hostname.includes('vercel.app') 
+        ? 'wss://enterprise-market-backend.onrender.com/ws/inventory' 
+        : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/inventory`;
+    const wsUrl = import.meta.env.VITE_WS_URL || defaultWsHost;
     let ws;
     let pingInterval;
     let reconnectTimeout;
